@@ -2,44 +2,51 @@ from tkinter import *
 from tkinter import messagebox as msg
 from tkinter import ttk
 from tkinter import filedialog
+import pygame
 from plyer import notification
 from PIL import Image, ImageTk
 import time
 import threading
 import schedule
 
+#PYGAME
+pygame.mixer.init()
+
 t = Tk()
 t.title('Notifier')
 t.geometry("800x600")
-img = Image.open("C:/Users/SHUBHAM NAVALE/Pictures/notify-label.png")
+
+img = Image.open(r"C:\Users\ABHISHEK YEWALE\NOTIFICATION-DESKTOP-APP\notify-label.png")
 tkimage = ImageTk.PhotoImage(img)
 
-# Notification history data
 notification_history_data = []
+custom_sound_path = StringVar(value="")
+custom_duration = IntVar(value=10)
 
-# Customization options
-custom_sound_path = StringVar(value="")  # Variable to store the custom sound file path
-custom_duration = IntVar(value=10)  # Default duration in seconds
-
-# Function to handle notification
 def handle_notification(title, message, delay, icon_path=None):
-    t.after(delay * 1000, lambda: notification.notify(
-        title=title,
-        message=message,
-        app_name="Notifier",
-        app_icon=icon_path,
-        toast=True,
-        timeout=custom_duration.get()
-    ))
+    sound_path = custom_sound_path.get()
 
-    # Add the notification to the history
+    def show_notification():
+        notification.notify(
+            title=title,
+            message=message,
+            app_name="Notifier",
+            app_icon=icon_path,
+            timeout=custom_duration.get()
+        )
+
+        # Play the selected sound
+        if sound_path:
+            pygame.mixer.music.load(sound_path)
+            pygame.mixer.music.play()
+
+    t.after(delay * 1000, show_notification)
+
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     notification_history_data.append((timestamp, title, message))
-
-    # Update the history table
     update_history_table()
 
-# Function to handle recurring notification
+
 def handle_recurring_notification(title, message, icon_path, interval):
     def job():
         notification.notify(
@@ -51,41 +58,15 @@ def handle_recurring_notification(title, message, icon_path, interval):
             timeout=custom_duration.get()
         )
 
-        # Add the notification to the history
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
         notification_history_data.append((timestamp, title, message))
-
-        # Update the history table
         update_history_table()
 
-    # Schedule the job based on the provided interval (daily or weekly)
     if interval == "daily":
-        schedule.every().day.at("09:00").do(job)  # Example: Notify daily at 9 AM
+        schedule.every().day.at("09:00").do(job)
     elif interval == "weekly":
-        schedule.every().monday.at("09:00").do(job)  # Example: Notify every Monday at 9 AM
+        schedule.every().monday.at("09:00").do(job)
 
-
-# Remove the duplicate get_details function and modify the existing one
-def get_details():
-    get_title = title.get()
-    get_msg = msg.get()
-    get_time = time1.get()
-
-    if get_title == "" or get_msg == "" or get_time == "":
-        messagebox.showerror("Alert", "All fields are required!")
-    else:
-        int_time = int(float(get_time))
-        min_to_sec = int_time * 60
-
-        if recurring_var.get() == 1:
-            handle_recurring_notification(get_title, get_msg, icon_path, recurring_interval.get())
-            messagebox.showinfo("Recurring Notifier set",
-                                f"Recurring notifications will be shown {recurring_interval.get()} at 9:00 AM")
-        else:
-            threading.Thread(target=handle_notification, args=(get_title, get_msg, min_to_sec, icon_path)).start()
-            messagebox.showinfo("Notifier set", f"Notification will be shown in {get_time} minutes")
-
-# Function to update the notification history table
 def update_history_table():
     for i in history_table.get_children():
         history_table.delete(i)
@@ -93,14 +74,10 @@ def update_history_table():
     for item in notification_history_data:
         history_table.insert("", "end", values=item)
 
-# Function to select a custom sound file
 def select_custom_sound():
     file_path = filedialog.askopenfilename(filetypes=[("Sound files", "*.wav;*.mp3;*.m4a")])
     custom_sound_path.set(file_path)
 
-# Rest of your Tkinter mainloop code...
-
-# Add customization options UI
 # Label - Custom Sound
 custom_sound_label = Label(t, text="Custom Sound File", font=("poppins", 10))
 custom_sound_label.place(x=20, y=220)
@@ -133,10 +110,6 @@ scrollbar = ttk.Scrollbar(t, orient="vertical", command=history_table.yview)
 scrollbar.place(x=770, y=400, height=200)
 history_table.configure(yscrollcommand=scrollbar.set)
 
-
-
-
-
 # get details and setup notification
 def get_details():
     get_title = title.get()
@@ -149,20 +122,18 @@ def get_details():
         int_time = int(float(get_time))
         min_to_sec = int_time * 60
 
-        # Using threading to handle the delay
         threading.Thread(target=handle_notification, args=(get_title, get_msg, min_to_sec)).start()
         msg.showinfo("Notifier set", "Notification will be shown in {} minutes".format(get_time))
 
-
-
-img_label = Label(t, image=tkimage).grid()
+img_label = Label(t, image=tkimage)
+img_label.grid()
 
 # Label - Title
-t_label = Label(t, text="Title to Notify",font=("poppins", 10))
+t_label = Label(t, text="Title to Notify", font=("poppins", 10))
 t_label.place(x=12, y=70)
 
 # ENTRY - Title
-title = Entry(t, width="25",font=("poppins", 13))
+title = Entry(t, width="25", font=("poppins", 13))
 title.place(x=123, y=70)
 
 # Label - Message
@@ -171,7 +142,7 @@ m_label.place(x=12, y=120)
 
 # ENTRY - Message
 msg1 = Entry(t, width="40", font=("poppins", 13))
-msg1.place(x=123,height=30, y=120)
+msg1.place(x=123, height=30, y=120)
 
 # Label - Time
 time_label = Label(t, text="Set Time", font=("poppins", 10))
@@ -185,15 +156,10 @@ time1.place(x=123, y=175)
 time_min_label = Label(t, text="min", font=("poppins", 10))
 time_min_label.place(x=175, y=180)
 
-
 but = Button(t, text="SET NOTIFICATION", font=("poppins", 10, "bold"), fg="#ffffff", bg="#528DFF", width=20,
              relief="raised",
              command=get_details)
 but.place(x=170, y=320)
 
-t.resizable(0,0)
-t.mainloop()
-
-
-# Run the Tkinter main loop
+t.resizable(0, 0)
 t.mainloop()
