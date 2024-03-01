@@ -17,7 +17,7 @@ import sqlite3
 
 DATABASE_FILE = 'Notification.db'
 TABLE_NAME = 'Notification'
-
+USER_email=""
 #To create a database The_Student
 con1=sqlite3.connect(DATABASE_FILE)
 cur_db=con1.cursor()
@@ -26,7 +26,45 @@ con1.commit()
 
 
 
+# Function to find the table is exist or not
+def is_table_exists(table_name):
+    # Connect to the SQLite database
+    conn = sqlite3.connect(DATABASE_FILE)
+    
+    # Create a cursor object to execute SQL queries
+    cursor = conn.cursor()
+    
+    # Execute a query to check if the table exists
+    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';")
+    
+    # Fetch the result
+    result = cursor.fetchone()
+    
+    # Close the connection
+    conn.close()
+    
+    # If the result is not None, the table exists
+    return result is not None
+
+
+
+
+
 def app_window():
+
+    con1=sqlite3.connect(DATABASE_FILE)
+    cur_db=con1.cursor()
+    create_table_query = f'''
+    CREATE TABLE IF NOT EXISTS {USER_email.split('@')[0]} (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        Title TEXT,
+        Message TEXT
+    );
+    '''
+    a=cur_db.execute(create_table_query)
+    con1.commit()
+
     # Functions for the Use
     def handle_notification(title, message, delay, icon_path=None):
         sound_path = custom_sound_path.get()
@@ -89,6 +127,8 @@ def app_window():
         get_msg = msg1.get()
         get_time = time1.get()
 
+
+
         if get_title == "" or get_msg == "" or get_time == "":
             msg.showerror("Alert", "All fields are required!")
         else:
@@ -120,7 +160,7 @@ def app_window():
 
 
     #Image 
-    img = Image.open(r"C:\Users\ABHISHEK YEWALE\Downloads\NOTIFICATION-DESKTOP-APP\notify-label.png")
+    img = Image.open("notify-label.png")
     tkimage = ImageTk.PhotoImage(img)
     img_label = Label(t, image=tkimage)
     img_label.grid()
@@ -234,7 +274,75 @@ def register_window():
             if((e2.get())==(e3.get())):
                 e3.config(fg="black")
                 blabel.config(text="")
-                register_DB()    
+                email=e5.get()
+                if is_table_exists(email.split('@')[0]):
+                    clr()
+                    a=msg.askyesno("Email ID already exist","If you wish to Login to the entered email\nClick \"OK\"")
+                    print(a)
+
+                    if a==True:
+                        print(email)
+                        root.destroy()
+                        def chck_cred():
+                            con1=sqlite3.connect(DATABASE_FILE)
+                            cur_db=con1.cursor()
+                            cur_db.execute(f'select passwd from {TABLE_NAME} where email="{email}"')
+                            a=cur_db.fetchone()
+                            con1.commit()
+
+                            print(a[0])
+
+                            if a[0]==er2.get():
+                                global USER_email
+                                USER_email=email
+                                app_window()
+
+                        rootk=Tk()
+                        rootk.title("Desktop Notifier")
+                        rootk.config(bg="MediumPurple1")
+                        rootk.geometry("500x220")
+                        rootk.minsize(500,220)
+                        rootk.maxsize(500,220)
+
+                        #Creating a blank textbox
+                        blabel1=Label(rootk,bg="MediumPurple1")
+                        blabel1.pack()
+                        blank_label=Label(rootk,text="Please enter your Login Credentials",bg="MediumPurple1",fg="white",font="arial 20 bold",width=28,relief=RIDGE)
+                        blank_label.pack()
+                        blabel2=Label(rootk,bg="MediumPurple1")
+                        blabel2.pack()
+                        blabel3=Label(rootk,bg="MediumPurple1")
+                        blabel3.pack()
+                        blabel3=Label(rootk,bg="MediumPurple1")
+                        blabel3.pack()
+                        blabel3=Label(rootk,bg="MediumPurple1")
+                        blabel3.pack()
+                        blabel3=Label(rootk,bg="MediumPurple1")
+                        blabel3.pack()
+                        blabel3=Label(rootk,bg="MediumPurple1")
+                        blabel3.pack()
+
+                        #Creating Lable of Email
+                        lr1=Label(rootk,text="Email ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
+                        lr1.place(anchor=CENTER,x=57,y=100)
+                        #Creating Textbox of Email
+                        er1=Label(rootk,width=25,text=email,font="calibri",fg="white",bg="MediumPurple1",justify=LEFT,anchor=W,relief="groove")
+                        er1.place(anchor=CENTER,x=300,y=100)
+
+                        #Creating Password Label
+                        lr2=Label(rootk,text="Enter Password ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
+                        lr2.place(anchor=CENTER,x=105,y=140)
+                        #Creating Password textbox
+                        er2=Entry(rootk,width=23,show="*",font="calbri")
+                        er2.place(anchor=CENTER,x=300,y=140)
+
+                        login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",font="arial 12 bold",height=20,width=50,relief=GROOVE)
+                        login_button.pack(anchor=CENTER)
+                        login_button.config(command=chck_cred)
+                        
+                        rootk.mainloop()
+                else:
+                    register_DB()
             else:
                 e3.config(fg="red")
                 blabel.config(text="Password does not match !")
@@ -261,6 +369,7 @@ def register_window():
                         root1.destroy()
                         con1=sqlite3.connect(DATABASE_FILE)
                         cur_db=con1.cursor()
+                        user_email=e5.get()
                         query=(f"insert into {TABLE_NAME} values('{e1.get()}','{e2.get()}',{e4.get()},'{e5.get()}')")
                         cur_db.execute(query)
                         con1.commit()
@@ -268,15 +377,38 @@ def register_window():
                         print(a)
                         if a=="ok":
                             clr()
-                            b2.destroy()
-                            b3.destroy()
-                            b1.config(text="Login",font="arial 18 bold",command=lambda:[destry(),app_window()])
-                            blabel.config(text="Login", font="arial 14 bold", fg="green")
+                            global USER_email
+                            USER_email=user_email
+                            root.destroy()
+
+                            rootk=Tk()
+                            rootk.title("Desktop Notifier")
+                            rootk.config(bg="MediumPurple1")
+                            rootk.geometry("400x200")
+                            rootk.minsize(400,200)
+                            rootk.maxsize(400,200)
+
+                            #Creating a blank textbox
+                            blabel1=Label(rootk,bg="MediumPurple1")
+                            blabel1.pack()
+
+                            blabel=Label(rootk,text="Click  \"LOGIN\"  to continue...",bg="MediumPurple1",fg="white",font="arial 20 bold",width=28,relief=RIDGE)
+                            blabel.pack()
+
+                            blabel2=Label(rootk,bg="MediumPurple1")
+                            blabel2.pack()
+
+                            blabel3=Label(rootk,bg="MediumPurple1")
+                            blabel3.pack()
+
+
+                            #Creating a button to Register
+                            b1=Button(rootk,text="Login",relief="groove",font=("arial",16,"bold"),height=1,command=lambda:[rootk.destroy(),app_window()])
+                            b1.pack()
+                            rootk.mainloop()
 
 
                         
-
-
                     except Exception as e:
                         print(e)
                         msg.showinfo("Unsuccessfull Execution","Error occured while Registering. Please retry")
@@ -308,16 +440,6 @@ def register_window():
 
             B2=Button(root1,text='Submit',command=verify,font=('Calibri',8,'bold'),bg="bisque",relief=GROOVE)
             B2.place(x=280,y=60)
-
-
-
-
-
-        
-
-
-
-        
     #Creating Name Label
     l1=Label(root,text="Enter Name",font=("arial",14,"bold"),bg="MediumPurple1")
     l1.place(anchor=CENTER,x=85,y=130)
@@ -340,15 +462,15 @@ def register_window():
     e3.place(anchor=CENTER,x=350,y=210)
              
     #Creating Mobile No Label
-    l1=Label(root,text="Enter Mobile",font=("arial",14,"bold"),bg="MediumPurple1")
-    l1.place(anchor=CENTER,x=90,y=250)
+    l4=Label(root,text="Enter Mobile",font=("arial",14,"bold"),bg="MediumPurple1")
+    l4.place(anchor=CENTER,x=90,y=250)
     #Creating Textbox of Mobile No Label
     e4=Entry(root,width=25,font="calibri")
     e4.place(anchor=CENTER,x=350,y=250)
 
     #Creating Email Label
-    l1=Label(root,text="Enter E-mail",font=("arial",14,"bold"),bg="MediumPurple1")
-    l1.place(anchor=CENTER,x=90,y=290)
+    l5=Label(root,text="Enter E-mail",font=("arial",14,"bold"),bg="MediumPurple1")
+    l5.place(anchor=CENTER,x=90,y=290)
     #Creating Textbox of Email Label
     e5=Entry(root,width=25,font="calibri")
     e5.place(anchor=CENTER,x=350,y=290)
