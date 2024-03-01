@@ -1,4 +1,3 @@
-# 26-02-24
 from tkinter import *
 from tkinter import messagebox as msg
 from tkinter import ttk
@@ -9,7 +8,7 @@ from PIL import Image, ImageTk
 import time
 import threading
 import schedule
-import mysql.connector as m # python -m pip install mysql-connector-python
+# import mysql.connector as m # python -m pip install mysql-connector-python
 import os
 import math
 import random
@@ -216,7 +215,7 @@ def app_window():
 def register_window():
     root=Tk()
     root.title("Notifier")
-    root.config(bg="Purple")
+    root.config(bg="MediumPurple1")
     root.geometry("500x500")
     root.minsize(500,500)
     root.maxsize(500,500)
@@ -297,8 +296,8 @@ def register_window():
             root1=Tk()
             root1.geometry("400x100")
             root1.title("OTP Verification")
-            root1.config(background="LightBlue")
-            l1=Label(root1,text=" THE STUDENTS ",font=("Times",15,"bold"),bg="LightBlue",fg="grey",relief="ridge")
+            root1.config(background="MediumPurple1")
+            l1=Label(root1,text=" THE STUDENTS ",font=("Times",15,"bold"),bg="MediumPurple1",fg="grey",relief="ridge")
             l1.pack(pady=10)
 
             l2=Label(root1,text="Enter OTP:",font=('Calibri',10,'bold'),bg="salmon")
@@ -320,42 +319,42 @@ def register_window():
 
         
     #Creating Name Label
-    l1=Label(root,text="Enter Name",font=("arial",14,"bold"),bg="lightblue")
+    l1=Label(root,text="Enter Name",font=("arial",14,"bold"),bg="MediumPurple1")
     l1.place(anchor=CENTER,x=85,y=130)
     #Creating Textbox of Name Label
     e1=Entry(root,width=25,font="calibri")
     e1.place(anchor=CENTER,x=350,y=130)
 
     #Creating Password Label
-    l2=Label(root,text="Enter Password",font=("arial",14,"bold"),bg="lightblue")
+    l2=Label(root,text="Enter Password",font=("arial",14,"bold"),bg="MediumPurple1")
     l2.place(anchor=CENTER,x=105,y=170)
     #Creating Password textbox
     e2=Entry(root,width=23,show="*",font="calbri")
     e2.place(anchor=CENTER,x=350,y=170)
 
     #Creating RPassword Label
-    l3=Label(root,text="Re-Enter Password",font=("arial",14,"bold"),bg="lightblue")
+    l3=Label(root,text="Re-Enter Password",font=("arial",14,"bold"),bg="MediumPurple1")
     l3.place(anchor=CENTER,x=120,y=210)
     #Creating RPassword textbox
     e3=Entry(root,width=23,font="calbri")
     e3.place(anchor=CENTER,x=350,y=210)
              
     #Creating Mobile No Label
-    l1=Label(root,text="Enter Mobile",font=("arial",14,"bold"),bg="lightblue")
+    l1=Label(root,text="Enter Mobile",font=("arial",14,"bold"),bg="MediumPurple1")
     l1.place(anchor=CENTER,x=90,y=250)
     #Creating Textbox of Mobile No Label
     e4=Entry(root,width=25,font="calibri")
     e4.place(anchor=CENTER,x=350,y=250)
 
     #Creating Email Label
-    l1=Label(root,text="Enter E-mail",font=("arial",14,"bold"),bg="lightblue")
+    l1=Label(root,text="Enter E-mail",font=("arial",14,"bold"),bg="MediumPurple1")
     l1.place(anchor=CENTER,x=90,y=290)
     #Creating Textbox of Email Label
     e5=Entry(root,width=25,font="calibri")
     e5.place(anchor=CENTER,x=350,y=290)
 
     #Creating a blank textbox
-    blabel=Label(root,text="",bg="lightblue",fg="red",font="arial 12 bold",width=40)
+    blabel=Label(root,text="",bg="MediumPurple1",fg="red",font="arial 12 bold",width=40)
     blabel.place(x=55,y=330)
 
     #Creating a button to Register
@@ -371,7 +370,7 @@ def register_window():
     #Inserting a image
     image1=PhotoImage(file="logo.png")
     image1=image1.subsample(18,18)
-    image_label=Label(root,text="REGISTER",font="times 12 bold",image=image1,bg="lightblue",compound=TOP)
+    image_label=Label(root,text="REGISTER",font="times 12 bold",image=image1,bg="MediumPurple1",compound=TOP)
     image_label.pack(pady=8)
 
     #Creating a button to clear    
