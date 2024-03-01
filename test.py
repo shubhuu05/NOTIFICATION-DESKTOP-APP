@@ -48,7 +48,7 @@ rootk.maxsize(500,220)
 #Creating a blank textbox
 blabel1=Label(rootk,bg="MediumPurple1")
 blabel1.pack()
-blabel=Label(rootk,text="Please enter your Login Credentials",bg="MediumPurple1",fg="white",font="arial 20 bold",width=28,relief=RIDGE)
+blabel=Label(rootk,text="     Login Successfully     ",bg="MediumPurple1",fg="white",font="arial 20 bold",width=28,relief=RIDGE)
 blabel.pack()
 blabel2=Label(rootk,bg="MediumPurple1")
 blabel2.pack()
@@ -63,21 +63,9 @@ blabel3.pack()
 blabel3=Label(rootk,bg="MediumPurple1")
 blabel3.pack()
 
-#Creating Lable of Email
-l1=Label(rootk,text="Email ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
-l1.place(anchor=CENTER,x=57,y=100)
-#Creating Textbox of Email
-e1=Label(rootk,width=25,text="abc@gmail.com",font="calibri",bg="MediumPurple1",justify=LEFT,anchor=W,relief="groove")
-e1.place(anchor=CENTER,x=300,y=100)
 
-#Creating Password Label
-l2=Label(rootk,text="Enter Password ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
-l2.place(anchor=CENTER,x=105,y=140)
-#Creating Password textbox
-e2=Entry(rootk,width=23,show="*",font="calbri")
-e2.place(anchor=CENTER,x=300,y=140)
 
-blabel=Button(rootk,text="Login",bg="white",fg="MediumPurple1",font="arial 12 bold",height=20,width=50,relief=GROOVE)
-blabel.pack(anchor=CENTER)
+blabel=Button(rootk,text="Proceed",bg="white",fg="MediumPurple1",font="arial 18 bold",width=30,relief=GROOVE)
+blabel.place(x=18,y=110)
 
 rootk.mainloop()

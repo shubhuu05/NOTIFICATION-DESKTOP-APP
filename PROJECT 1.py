@@ -64,6 +64,7 @@ def app_window():
     '''
     a=cur_db.execute(create_table_query)
     con1.commit()
+    con1.close()
 
     # Functions for the Use
     def handle_notification(title, message, delay, icon_path=None):
@@ -141,7 +142,7 @@ def app_window():
     pygame.mixer.init()
     t = Tk()
     t.title('Notifier')
-
+    print(USER_email)
     # Calculate the center coordinates
     screen_width = t.winfo_screenwidth()
     screen_height = t.winfo_screenheight()
@@ -283,6 +284,8 @@ def register_window():
                     if a==True:
                         print(email)
                         root.destroy()
+
+                        #TO check the entered password is right or wrong
                         def chck_cred():
                             con1=sqlite3.connect(DATABASE_FILE)
                             cur_db=con1.cursor()
@@ -295,8 +298,17 @@ def register_window():
                             if a[0]==er2.get():
                                 global USER_email
                                 USER_email=email
-                                app_window()
+                                msg.showinfo('Login Successfully','You have entered valid credentials')
+                                lr1.destroy()
+                                er1.destroy()
+                                lr2.destroy()
+                                er2.destroy()
+                                blank_label.config(text="     Login Successfully     ")
+                                login_button.config(text="Proceed",width=30,bg="white",fg="MediumPurple1",font="arial 18 bold",height=1,command=lambda:[rootk.destroy(),app_window()])
+                                login_button.place(x=18,y=110)
 
+                            else:
+                                msg.showwarning("Invalid Password","You have entered the wrong password.\nTry Again")
                         rootk=Tk()
                         rootk.title("Desktop Notifier")
                         rootk.config(bg="MediumPurple1")
@@ -373,6 +385,7 @@ def register_window():
                         query=(f"insert into {TABLE_NAME} values('{e1.get()}','{e2.get()}',{e4.get()},'{e5.get()}')")
                         cur_db.execute(query)
                         con1.commit()
+                        con1.close()
                         a=msg.showinfo('Successfull Execution','User registeration successfully')
                         print(a)
                         if a=="ok":
@@ -414,7 +427,7 @@ def register_window():
                         msg.showinfo("Unsuccessfull Execution","Error occured while Registering. Please retry")
                         clr()
                 else:
-                    msg.showinf("Invalid OTP","Check your OTP again")
+                    msg.showinfo("Invalid OTP","Check your OTP again")
                     print("Check your OTP again")
 
             OTP1=str(random.randint(1000,9999))
