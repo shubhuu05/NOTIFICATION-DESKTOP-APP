@@ -79,17 +79,61 @@ def app_window():
                 timeout=custom_duration.get()
             )
 
-            # Play the selected sound
             if sound_path:
                 pygame.mixer.music.load(sound_path)
                 pygame.mixer.music.play()
 
+            con1 = sqlite3.connect(DATABASE_FILE)
+            cur_db = con1.cursor()
+            user_table_name = USER_email.split('@')[0]
+            insert_query = f'''
+            INSERT INTO {user_table_name} (Timestamp, Title, Message)
+            VALUES (CURRENT_TIMESTAMP, ?, ?);
+            '''
+            cur_db.execute(insert_query, (title, message))
+            con1.commit()
+            con1.close()
+
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            notification_history_data.append((timestamp, title, message))
+            update_history_table()
+
         t.after(delay * 1000, show_notification)
 
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-        notification_history_data.append((timestamp, title, message))
-        update_history_table()
 
+    def update_history_table():
+        try:
+            # Clear the existing rows in the table
+            for i in history_table.get_children():
+                history_table.delete(i)
+
+            # Connect to the database
+            con1 = sqlite3.connect(DATABASE_FILE)
+            cur_db = con1.cursor()
+            user_table_name = USER_email.split('@')[0]
+
+            # Select all rows from the user's table
+            select_query = f'''
+            SELECT Timestamp, Title, Message FROM {user_table_name};
+            '''
+            cur_db.execute(select_query)
+            rows = cur_db.fetchall()
+            con1.close()
+
+            # Insert the retrieved rows into the table
+            for row in rows:
+                history_table.insert("", "end", values=row)
+
+            print("Table updated successfully")
+
+        except Exception as e:
+            print("Error updating history table:", e)
+
+        for i in history_table.get_children():
+            history_table.delete(i)
+
+        for item in notification_history_data:
+            history_table.insert("", "end", values=item)
 
     def handle_recurring_notification(title, message, icon_path, interval):
         def job():
@@ -111,12 +155,6 @@ def app_window():
         elif interval == "weekly":
             schedule.every().monday.at("09:00").do(job)
 
-    def update_history_table():
-        for i in history_table.get_children():
-            history_table.delete(i)
-
-        for item in notification_history_data:
-            history_table.insert("", "end", values=item)
 
     def select_custom_sound():
         file_path = filedialog.askopenfilename(filetypes=[("Sound files", "*.wav;*.mp3;*.m4a")])
@@ -232,7 +270,6 @@ def app_window():
 
 
 
-    #Controls 3
     # Add a table for notification history
     history_table = ttk.Treeview(t, columns=("Timestamp", "Title", "Message"), show="headings", height=10)
     history_table.heading("Timestamp", text="Timestamp")
@@ -244,6 +281,9 @@ def app_window():
     scrollbar = ttk.Scrollbar(t, orient="vertical", command=history_table.yview)
     scrollbar.place(x=623, y=400, height=225)
     history_table.configure(yscrollcommand=scrollbar.set)
+
+    # Call update_history_table after creating the history_table
+    update_history_table()
 
 
     t.resizable(0,0)
