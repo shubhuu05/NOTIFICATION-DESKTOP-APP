@@ -229,7 +229,6 @@ def app_window():
 
 
     pygame.mixer.init()
-    # Create the main window
     t = Tk()
     t.title('Notifier')
 
@@ -287,7 +286,7 @@ def app_window():
     custom_sound_label = Label(t, text="Custom Sound File", font=labels_font)
     custom_sound_label.grid(row=5, column=0, padx=20, pady=5, sticky="w")
 
-    custom_sound_entry = Entry(t, textvariable=StringVar(), font=entry_font, width=40, state="readonly")
+    custom_sound_entry = Entry(t, textvariable=custom_sound_path, font="arial 12 bold", width=40, state=DISABLED,)
     custom_sound_entry.grid(row=5, column=1, padx=20, pady=5, sticky="w")
 
     select_sound_button = Button(t, text="Select", command=select_custom_sound)
@@ -298,7 +297,12 @@ def app_window():
     custom_duration_label.grid(row=6, column=0, padx=20, pady=5, sticky="w")
 
     custom_duration_entry = Entry(t, textvariable=IntVar(), font=entry_font, width=5)
-    custom_duration_entry.grid(row=6, column=1, padx=20, pady=5, sticky="w")
+    custom_duration_entry.grid(row=6, column=1,sticky="w")
+
+    refresh_button=Button(t,text="Refresh",command=update_history_table)
+    refresh_button.grid(row=6,column=2,sticky="w")
+    refresh_button=Button(t,text="Clear")
+    refresh_button.grid(row=6,column=3,sticky="w")
 
     # History Table
     style = ttk.Style()
@@ -327,6 +331,7 @@ def app_window():
 
     # Start the main loop
     t.mainloop()
+
 
 
 

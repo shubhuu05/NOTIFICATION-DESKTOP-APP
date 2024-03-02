@@ -129,7 +129,10 @@ def app_window():
             print("Error updating history table:", e)
 
 
-
+    def delete_hist():
+        # Clear the existing rows in the table
+            for i in history_table.get_children():
+                history_table.delete(i)
 
 
 
@@ -231,7 +234,12 @@ def app_window():
     custom_duration_label.grid(row=6, column=0, padx=20, pady=5, sticky="w")
 
     custom_duration_entry = Entry(t, textvariable=IntVar(), font=entry_font, width=5)
-    custom_duration_entry.grid(row=6, column=1, padx=20, pady=5, sticky="w")
+    custom_duration_entry.grid(row=6, column=1, padx=20 sticky="w")
+
+    refresh_button=Button(t,text="Refresh",command=update_history_table)
+    refresh_button.grid(row=6,column=2,sticky="w")
+    refresh_button=Button(t,text="Clear",command=delete_hist)
+    refresh_button.grid(row=6,column=3,sticky="w")
 
     # History Table
     style = ttk.Style()
@@ -451,7 +459,7 @@ def register_window():
             root1.geometry("400x100")
             root1.title("OTP Verification")
             root1.config(background="MediumPurple1")
-            l1=Label(root1,text=" THE STUDENTS ",font=("Times",15,"bold"),bg="MediumPurple1",fg="grey",relief="ridge")
+            l1=Label(root1,text=" Notifier ",font=("Times",15,"bold"),bg="MediumPurple1",fg="white",relief="ridge")
             l1.pack(pady=10)
 
             l2=Label(root1,text="Enter OTP:",font=('Calibri',10,'bold'),bg="salmon")
@@ -626,7 +634,7 @@ def main_window():
         win1.destroy()
 
     #Label for the Title
-    l1=Label(win1,text=" Notifier ",font=("Times",30,"bold"),bg="MediumPurple1",fg="grey",relief="ridge")
+    l1=Label(win1,text=" Notifier ",font=("Times",30,"bold"),bg="MediumPurple1",fg="white",relief="ridge")
     l1.pack(pady=40)
 
     #Register Button
@@ -644,7 +652,7 @@ def main_window():
     lblank1.pack()
 
     #Credit Label
-    l2=Label(win1,text="designed by DATTARAM KOLTE",font=("calibri",8,"bold"),bg="MediumPurple1")
+    l2=Label(win1,text="designed by Shubhuuuuuuuu",font=("calibri",8,"bold"),bg="MediumPurple1")
     l2.pack()   
 
     win1.mainloop()
