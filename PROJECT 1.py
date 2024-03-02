@@ -83,19 +83,19 @@ def app_window():
                 pygame.mixer.music.load(sound_path)
                 pygame.mixer.music.play()
 
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            
             con1 = sqlite3.connect(DATABASE_FILE)
             cur_db = con1.cursor()
             user_table_name = USER_email.split('@')[0]
             insert_query = f'''
             INSERT INTO {user_table_name} (Timestamp, Title, Message)
-            VALUES (CURRENT_TIMESTAMP, ?, ?);
+            VALUES (?, ?, ?);
             '''
-            cur_db.execute(insert_query, (title, message))
+            cur_db.execute(insert_query, (timestamp,title, message))
             con1.commit()
             con1.close()
 
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            notification_history_data.append((timestamp, title, message))
             update_history_table()
 
         t.after(delay * 1000, show_notification)
@@ -129,36 +129,17 @@ def app_window():
         except Exception as e:
             print("Error updating history table:", e)
 
-        for i in history_table.get_children():
-            history_table.delete(i)
 
-        for item in notification_history_data:
-            history_table.insert("", "end", values=item)
 
-    def handle_recurring_notification(title, message, icon_path, interval):
-        def job():
-            notification.notify(
-                title=title,
-                message=message,
-                app_name="Notifier",
-                app_icon=icon_path,
-                toast=True,
-                timeout=custom_duration.get()
-            )
-
-            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            notification_history_data.append((timestamp, title, message))
-            update_history_table()
-
-        if interval == "daily":
-            schedule.every().day.at("09:00").do(job)
-        elif interval == "weekly":
-            schedule.every().monday.at("09:00").do(job)
 
 
     def select_custom_sound():
         file_path = filedialog.askopenfilename(filetypes=[("Sound files", "*.wav;*.mp3;*.m4a")])
         custom_sound_path.set(file_path)
+
+
+
+
 
     # get details and setup notification
     def get_details():
@@ -176,6 +157,9 @@ def app_window():
 
             threading.Thread(target=handle_notification, args=(get_title, get_msg, min_to_sec)).start()
             msg.showinfo("Notifier set", "Notification will be shown in {} minutes".format(get_time))
+
+
+
 
     pygame.mixer.init()
     t = Tk()
@@ -203,8 +187,6 @@ def app_window():
     tkimage = ImageTk.PhotoImage(img)
     img_label = Label(t, image=tkimage)
     img_label.grid()
-
-    notification_history_data = []
     custom_sound_path = StringVar(value="")
     custom_duration = IntVar(value=10)
 
