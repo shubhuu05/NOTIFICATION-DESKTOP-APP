@@ -114,8 +114,7 @@ def app_window():
 
             # Select all rows from the user's table
             select_query = f'''
-            SELECT Timestamp, Title, Message FROM {user_table_name};
-            '''
+            SELECT Timestamp, Title, Message FROM {user_table_name};'''
             cur_db.execute(select_query)
             rows = cur_db.fetchall()
             con1.close()
@@ -128,6 +127,7 @@ def app_window():
 
         except Exception as e:
             print("Error updating history table:", e)
+
 
 
 
@@ -162,9 +162,10 @@ def app_window():
 
 
     pygame.mixer.init()
+    
     t = Tk()
     t.title('Notifier')
-    print(USER_email)
+
     # Calculate the center coordinates
     screen_width = t.winfo_screenwidth()
     screen_height = t.winfo_screenheight()
@@ -175,104 +176,90 @@ def app_window():
     x = (screen_width - window_width) // 2
     y = (screen_height - window_height) // 2
 
-
     t.geometry(f"{window_width}x{window_height}+{x}+{y}")
-    # t.minsize(700,700)
-    # t.maxsize(700,700)
 
-
-
-    #Image 
+    # Load and display the image
     img = Image.open("notify-label.png")
     tkimage = ImageTk.PhotoImage(img)
     img_label = Label(t, image=tkimage)
-    img_label.grid()
+    img_label.grid(row=0, column=0, columnspan=3, padx=20, pady=20)
     custom_sound_path = StringVar(value="")
     custom_duration = IntVar(value=10)
 
+    # Controls
+    labels_font = ("Arial", 10)
+    entry_font = ("Arial", 13)
 
+    # Title
+    t_label = Label(t, text="Title to Notify", font=labels_font)
+    t_label.grid(row=1, column=0, padx=20, pady=5, sticky="w")
 
-    #Controls 1
-    # Label - Title
-    t_label = Label(t, text="Title to Notify", font=("poppins", 10))
-    t_label.place(x=20, y=70)
+    title = Entry(t, font=entry_font)
+    title.grid(row=1, column=1, padx=20, pady=5, sticky="w")
 
-    # ENTRY - Title
-    title = Entry(t, width="25", font=("poppins", 13))
-    title.place(x=130, y=70)
+    # Message
+    m_label = Label(t, text="Display Message", font=labels_font)
+    m_label.grid(row=2, column=0, padx=20, pady=5, sticky="w")
 
-    # Label - Message
-    m_label = Label(t, text="Display Message", font=("poppins", 10))
-    m_label.place(x=20, y=120)
+    msg1 = Entry(t, font=entry_font)
+    msg1.grid(row=2, column=1, padx=20, pady=5, sticky="w")
 
-    # ENTRY - Message
-    msg1 = Entry(t, width="40", font=("poppins", 13))
-    msg1.place(x=130, height=30, y=120)
+    # Time
+    time_label = Label(t, text="Set Time (min)", font=labels_font)
+    time_label.grid(row=3, column=0, padx=20, pady=5, sticky="w")
 
-    # Label - Time
-    time_label = Label(t, text="Set Time", font=("poppins", 10))
-    time_label.place(x=20, y=175)
+    time1 = Entry(t, font=entry_font, width=5)
+    time1.grid(row=3, column=1, padx=20, pady=5, sticky="w")
 
-    # ENTRY - Time
-    time1 = Entry(t, width="5", font=("poppins", 13))
-    time1.place(x=130, y=175)
+    # Button
+    but = Button(t, text="SET NOTIFICATION", font=("Arial", 10, "bold"), fg="#ffffff", bg="#528DFF", width=20,
+                relief="raised", command=get_details)
+    but.grid(row=4, column=0, columnspan=2, pady=10)
 
-    # Label - min
-    time_min_label = Label(t, text="min", font=("poppins", 10))
-    time_min_label.place(x=180, y=180)
+    # Custom Sound
+    custom_sound_label = Label(t, text="Custom Sound File", font=labels_font)
+    custom_sound_label.grid(row=5, column=0, padx=20, pady=5, sticky="w")
 
-    but = Button(t, text="SET NOTIFICATION", font=("poppins", 10, "bold"), fg="#ffffff", bg="#528DFF", width=20,
-                relief="raised",
-                command=get_details,
-                )
-    but.place(x=170, y=320)
+    custom_sound_entry = Entry(t, textvariable=custom_sound_path, font="arial 12 bold", width=40, state=DISABLED,)
+    custom_sound_entry.grid(row=5, column=1, padx=20, pady=5, sticky="w")
 
-
-
-    #Controls 2
-    # Label - Custom Sound
-    custom_sound_label = Label(t, text="Custom Sound File", font=("poppins", 10))
-    custom_sound_label.place(x=20, y=250)
-
-    # Entry - Custom Sound
-    custom_sound_entry = Entry(t, textvariable=custom_sound_path, width=50, state="readonly")
-    custom_sound_entry.place(x=150, y=250)
-
-    # Button - Select Custom Sound
     select_sound_button = Button(t, text="Select", command=select_custom_sound)
-    select_sound_button.place(x=500, y=245)
+    select_sound_button.grid(row=5, column=2, padx=10, pady=5, sticky="w")
 
-    # Label - Custom Duration
-    custom_duration_label = Label(t, text="Custom Notification Duration (seconds)", font=("poppins", 10))
-    custom_duration_label.place(x=20, y=280)
+    # Custom Duration
+    custom_duration_label = Label(t, text="Custom Notification Duration (seconds)", font=labels_font)
+    custom_duration_label.grid(row=6, column=0, padx=20, pady=5, sticky="w")
 
-    # Entry - Custom Duration
-    custom_duration_entry = Entry(t, textvariable=custom_duration, width=5)
-    custom_duration_entry.place(x=300, y=280)
+    custom_duration_entry = Entry(t, textvariable=IntVar(), font=entry_font, width=5)
+    custom_duration_entry.grid(row=6, column=1, padx=20, pady=5, sticky="w")
 
+    # History Table
+    style = ttk.Style()
+    style.theme_use("clam")
 
+    history_frame = Frame(t)
+    history_frame.grid(row=7, column=0, columnspan=3, padx=20, pady=10, sticky="nsew")
 
-    # Add a table for notification history
-    history_table = ttk.Treeview(t, columns=("Timestamp", "Title", "Message"), show="headings", height=10)
+    history_table = ttk.Treeview(history_frame, columns=("Timestamp", "Title", "Message"), show="headings", height=10)
     history_table.heading("Timestamp", text="Timestamp")
     history_table.heading("Title", text="Title")
     history_table.heading("Message", text="Message")
-    history_table.place(x=20, y=400)
 
-    # Add a scrollbar for the history table
-    scrollbar = ttk.Scrollbar(t, orient="vertical", command=history_table.yview)
-    scrollbar.place(x=623, y=400, height=225)
-    history_table.configure(yscrollcommand=scrollbar.set)
+    vsb = ttk.Scrollbar(history_frame, orient="vertical", command=history_table.yview)
+    vsb.pack(side='right', fill='y')
+    history_table.configure(yscrollcommand=vsb.set)
 
-    # Call update_history_table after creating the history_table
+    history_table.pack(side='left', fill='both', expand=True)
+
+    # Update the history table
     update_history_table()
 
+    # Configure resizing behavior
+    t.columnconfigure(1, weight=1)
+    t.rowconfigure(7, weight=1)
 
-    t.resizable(0,0)
+    # Start the main loop
     t.mainloop()
-
-
-
 
 
 def register_window():
@@ -522,7 +509,7 @@ def register_window():
     #Creating a button to back
     b2=Button(root,text="Back",relief="groove",font=("arial",13,"bold"),width=6,height=1)
     b2.place(anchor=CENTER,x=167,y=450)
-    b2.config(command=lambda:[destry(),app_window()])
+    b2.config(command=lambda:[destry(),main_window()])
 
     #Inserting a image
     image1=PhotoImage(file="logo.png")
@@ -540,7 +527,130 @@ def register_window():
 
 
 
+def login_window():
+    def chck_cred():
+        email=er1.get()
+        if is_table_exists(email.split("@")[0]):
+            con1=sqlite3.connect(DATABASE_FILE)
+            cur_db=con1.cursor()
+            cur_db.execute(f'select passwd from {TABLE_NAME} where email="{email}"')
+            a=cur_db.fetchone()
+            con1.commit()
+
+            print(a[0])
+
+            if a[0]==er2.get():
+                global USER_email
+                USER_email=email
+                msg.showinfo('Login Successfully','You have entered valid credentials')
+                lr1.destroy()
+                er1.destroy()
+                lr2.destroy()
+                er2.destroy()
+                blank_label.config(text="     Login Successfully     ")
+                login_button.config(text="Proceed",width=30,bg="white",fg="MediumPurple1",font="arial 18 bold",height=1,command=lambda:[rootk.destroy(),app_window()])
+                login_button.place(x=18,y=110)
+
+            else:
+                msg.showwarning("Invalid Password","You have entered the wrong password.\nTry Again")
+        
+        else:
+            msg.showerror("Invalid Email ID", "The entered Email ID in not registered.\nKindly register yourself first.")
+
+        
+
+    rootk=Tk()
+    rootk.title("Desktop Notifier")
+    rootk.config(bg="MediumPurple1")
+    rootk.geometry("500x220")
+    rootk.minsize(500,220)
+    rootk.maxsize(500,220)
+
+    #Creating a blank textbox
+    blabel1=Label(rootk,bg="MediumPurple1")
+    blabel1.pack()
+    blank_label=Label(rootk,text="Please enter your Login Credentials",bg="MediumPurple1",fg="white",font="arial 20 bold",width=28,relief=RIDGE)
+    blank_label.pack()
+    blabel2=Label(rootk,bg="MediumPurple1")
+    blabel2.pack()
+    blabel3=Label(rootk,bg="MediumPurple1")
+    blabel3.pack()
+    blabel3=Label(rootk,bg="MediumPurple1")
+    blabel3.pack()
+    blabel3=Label(rootk,bg="MediumPurple1")
+    blabel3.pack()
+    blabel3=Label(rootk,bg="MediumPurple1")
+    blabel3.pack()
+    blabel3=Label(rootk,bg="MediumPurple1")
+    blabel3.pack()
+
+    #Creating Lable of Email
+    lr1=Label(rootk,text="Enter Email ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
+    lr1.place(anchor=CENTER,x=105,y=100)
+    #Creating Textbox of Email
+    er1=Entry(rootk,width=26,font="calibri")
+    er1.place(anchor=CENTER,x=305,y=100)
+
+    #Creating Password Label
+    lr2=Label(rootk,text="Enter Password ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
+    lr2.place(anchor=CENTER,x=105,y=140)
+    #Creating Password textbox
+    er2=Entry(rootk,width=23,show="*",font="calbri")
+    er2.place(anchor=CENTER,x=305,y=140)
+
+    login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",font="arial 12 bold",height=20,width=50,relief=GROOVE)
+    login_button.pack(anchor=CENTER)
+    login_button.config(command=chck_cred)
+    
+    rootk.mainloop()
+
+
+
+def main_window():
+    #Creating the application window ( " The Students " )
+    win1=Tk()
+    win1.title("Notifier")
+    win1.config(bg="MediumPurple1")
+
+    screen_width = win1.winfo_screenwidth()
+    screen_height = win1.winfo_screenheight()
+    x_dim=(screen_width-500)//2
+    y_dim=(screen_height-350)//2
+    
+    win1.geometry(f"500x280+{x_dim}+{y_dim}")
+    win1.minsize(500,280)
+    win1.maxsize(500,280)
+    
+    #To destroy the window
+    def destry():
+        win1.destroy()
+
+    #Label for the Title
+    l1=Label(win1,text=" Notifier ",font=("Times",30,"bold"),bg="MediumPurple1",fg="grey",relief="ridge")
+    l1.pack(pady=40)
+
+    #Register Button
+    b1=Button(win1,text="Register",relief="groove",font=("arial",13,"bold"),width=15,height=1)
+    b1.pack()
+    b1.config(command=lambda:[destry(),register_window()])
+
+    #Login Button
+    b2=Button(win1,text="Login",relief="groove",font=("arial",13,"bold"),width=15,height=1)
+    b2.pack(pady=10)
+    b2.config(command=lambda:[destry(),login_window()])
+
+    #Blank Label
+    lblank1=Label(win1, bg="MediumPurple1")
+    lblank1.pack()
+
+    #Credit Label
+    l2=Label(win1,text="designed by DATTARAM KOLTE",font=("calibri",8,"bold"),bg="MediumPurple1")
+    l2.pack()   
+
+    win1.mainloop()
+
+
 
 #Point of Execution
 # register_window()
-register_window()
+main_window()
