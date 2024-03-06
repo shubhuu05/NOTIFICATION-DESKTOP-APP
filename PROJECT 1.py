@@ -234,7 +234,7 @@ def app_window():
     custom_duration_label.grid(row=6, column=0, padx=20, pady=5, sticky="w")
 
     custom_duration_entry = Entry(t, textvariable=IntVar(), font=entry_font, width=5)
-    custom_duration_entry.grid(row=6, column=1, padx=20 sticky="w")
+    custom_duration_entry.grid(row=6, column=1, padx=20, sticky="w")
 
     refresh_button=Button(t,text="Refresh",command=update_history_table)
     refresh_button.grid(row=6,column=2,sticky="w")
@@ -652,7 +652,7 @@ def main_window():
     lblank1.pack()
 
     #Credit Label
-    l2=Label(win1,text="designed by Shubhuuuuuuuu",font=("calibri",8,"bold"),bg="MediumPurple1")
+    l2=Label(win1,text="designed by Shubhuu",font=("calibri",8,"bold"),bg="MediumPurple1")
     l2.pack()   
 
     win1.mainloop()
