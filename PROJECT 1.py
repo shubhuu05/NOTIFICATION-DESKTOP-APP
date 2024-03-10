@@ -14,6 +14,8 @@ import math
 import random
 import smtplib
 import sqlite3
+from tkinter import ttk  # Import themed widgets
+
 
 DATABASE_FILE = 'Notification.db'
 TABLE_NAME = 'Notification'
@@ -134,7 +136,10 @@ def app_window():
             for i in history_table.get_children():
                 history_table.delete(i)
 
-
+    def delete_hist_for_sure():
+        connection=sqlite3.connect(DATABASE_FILE)
+        cur_db=connection.cursor()
+        
 
     def select_custom_sound():
         file_path = filedialog.askopenfilename(filetypes=[("Sound files", "*.wav;*.mp3;*.m4a")])
@@ -238,7 +243,7 @@ def app_window():
 
     refresh_button=Button(t,text="Refresh",command=update_history_table)
     refresh_button.grid(row=6,column=2,sticky="w")
-    refresh_button=Button(t,text="Clear",command=delete_hist)
+    refresh_button=Button(t,text="Clear",command=delete_hist_for_sure)
     refresh_button.grid(row=6,column=3,sticky="w")
 
     # History Table
@@ -633,27 +638,92 @@ def main_window():
     def destry():
         win1.destroy()
 
+    def manager_login_window():
+        
+        # Function to handle the login process
+        def validate_login():
+            username = entry_username.get()
+            password = entry_password.get()
+
+            # Add your authentication logic here
+            # For simplicity, let's assume a hardcoded username and password
+            if authenticate(username, password):
+                msg.showinfo("Login Successful", "Welcome, Manager!")
+                manager_login_win.destroy()  # Close the manager login window after successful login
+                # You can add more functionality here after successful login
+                register_window()
+            else:
+                msg.showerror("Login Failed", "Invalid username or password")
+
+        # Authentication logic (replace this with your actual logic)
+        def authenticate(username, password):
+            return username == "admin" and password == "admin123"
+
+
+        manager_login_win = Tk()
+        manager_login_win.title("Manager Login")
+        manager_login_win.geometry("400x200")
+        manager_login_win.configure(bg='#333')
+
+        # Add a logo (replace 'notify-label.png' with your actual image file)
+        original_logo = PhotoImage(file='notify-label.png')
+
+        # Resize the logo to fit the window
+        window_width = 400
+        window_height = 200
+        resized_logo = original_logo.subsample(int(original_logo.width() / window_width), int(original_logo.height() / window_height))
+
+        logo_label = ttk.Label(manager_login_win, image=resized_logo, background='#333')
+        logo_label.grid(row=0, column=0, columnspan=2)
+
+        # Create a frame for login details
+        login_frame = ttk.Frame(manager_login_win, padding=(20, 10), style='TFrame')
+        login_frame.grid(row=1, column=0, columnspan=2)
+
+        # Labels and Entry Widgets for Manager Login
+        ttk.Label(login_frame, text="Username:", foreground='#fff', background='#333', font=('Helvetica', 12, 'bold')).grid(row=0, column=0, padx=10, pady=5, sticky='e')
+        entry_username = ttk.Entry(login_frame, font=('Arial', 12))
+        entry_username.grid(row=0, column=1, padx=10, pady=5, sticky='w')
+
+        ttk.Label(login_frame, text="Password:", foreground='#fff', background='#333', font=('Helvetica', 12, 'bold')).grid(row=1, column=0, padx=10, pady=5, sticky='e')
+        entry_password = ttk.Entry(login_frame, show="*", font=('Arial', 12))
+        entry_password.grid(row=1, column=1, padx=10, pady=5, sticky='w')
+
+        # Manager Login Button with custom styling
+        b_login_manager = ttk.Button(manager_login_win, text="Login", command=validate_login, style='TButton.Artistic.TButton')
+        b_login_manager.grid(row=2, column=0, columnspan=2, pady=20)
+
+        # Style configuration
+        style = ttk.Style()
+        style.configure('TFrame', background='#333')
+
+        # Run the Tkinter event loop
+        manager_login_win.mainloop()
+
+        
+
     #Label for the Title
     l1=Label(win1,text=" Notifier ",font=("Times",30,"bold"),bg="MediumPurple1",fg="white",relief="ridge")
     l1.pack(pady=40)
 
     #Register Button
-    b1=Button(win1,text="Register",relief="groove",font=("arial",13,"bold"),width=15,height=1)
+    b1=Button(win1,text="Register",relief="groove",font=("arial",13,"bold"),bg="LightGreen",width=15,height=1)
     b1.pack()
     b1.config(command=lambda:[destry(),register_window()])
 
     #Login Button
-    b2=Button(win1,text="Login",relief="groove",font=("arial",13,"bold"),width=15,height=1)
+    b2=Button(win1,text="Login",relief="groove",font=("arial",13,"bold"),bg="LightBlue",width=15,height=1)
     b2.pack(pady=10)
     b2.config(command=lambda:[destry(),login_window()])
 
+    #Manager Login Button
+    b2=Button(win1,text="Manager Login",relief="groove",font=("arial",10,"bold"),bg="Salmon",width=30)
+    b2.pack(pady=10)
+    b2.config(command=lambda:[destry(),manager_login_window()])
+
     #Blank Label
     lblank1=Label(win1, bg="MediumPurple1")
-    lblank1.pack()
-
-    #Credit Label
-    l2=Label(win1,text="designed by Shubhuu",font=("calibri",8,"bold"),bg="MediumPurple1")
-    l2.pack()   
+    lblank1.pack()   
 
     win1.mainloop()
 
