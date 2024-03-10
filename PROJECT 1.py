@@ -23,7 +23,7 @@ USER_email=""
 #To create a database The_Student
 con1=sqlite3.connect(DATABASE_FILE)
 cur_db=con1.cursor()
-cur_db.execute(f"create table if not exists {TABLE_NAME} (name varchar(50), passwd varchar(50), mobile varchar(10), email varchar(50));")
+cur_db.execute(f"create table if not exists {TABLE_NAME} (name varchar(50), passwd varchar(50), mobile varchar(10), email varchar(50),notifi varchar(200));")
 con1.commit()
 
 
@@ -137,8 +137,24 @@ def app_window():
                 history_table.delete(i)
 
     def delete_hist_for_sure():
-        connection=sqlite3.connect(DATABASE_FILE)
-        cur_db=connection.cursor()
+        # Connect to the SQLite database
+        connection = sqlite3.connect(DATABASE_FILE)
+        cur_db = connection.cursor()
+
+        # Fetch all rows from the USER_email table
+        cur_db.execute(f"SELECT * FROM {USER_email.split("@")[0]}")
+        rows = cur_db.fetchall()
+
+                
+        # Delete the current row
+        cur_db.execute(f"DELETE FROM {USER_email.split("@")[0]} WHERE rowid=?", (rows[0]))  # Assuming the rowid is used
+        connection.commit()  # Commit the deletion for each row
+
+        # Update the history table after each deletion
+        update_history_table()
+
+        # Close the connection
+        connection.close()
         
 
     def select_custom_sound():
@@ -361,14 +377,14 @@ def register_window():
                         lr1.place(anchor=CENTER,x=57,y=100)
                         #Creating Textbox of Email
                         er1=Label(rootk,width=25,text=email,font="calibri",fg="white",bg="MediumPurple1",justify=LEFT,anchor=W,relief="groove")
-                        er1.place(anchor=CENTER,x=300,y=100)
+                        er1.place(anchor=CENTER,x=325,y=100)
 
                         #Creating Password Label
                         lr2=Label(rootk,text="Enter Password ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
                         lr2.place(anchor=CENTER,x=105,y=140)
                         #Creating Password textbox
                         er2=Entry(rootk,width=23,show="*",font="calbri")
-                        er2.place(anchor=CENTER,x=300,y=140)
+                        er2.place(anchor=CENTER,x=325,y=140)
 
                         login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",font="arial 12 bold",height=20,width=50,relief=GROOVE)
                         login_button.pack(anchor=CENTER)
@@ -404,7 +420,7 @@ def register_window():
                         con1=sqlite3.connect(DATABASE_FILE)
                         cur_db=con1.cursor()
                         user_email=e5.get()
-                        query=(f"insert into {TABLE_NAME} values('{e1.get()}','{e2.get()}',{e4.get()},'{e5.get()}')")
+                        query=(f"insert into {TABLE_NAME} values('{e1.get()}','{e2.get()}',{e4.get()},'{e5.get()}','NA')")
                         cur_db.execute(query)
                         con1.commit()
                         con1.close()
@@ -457,7 +473,7 @@ def register_window():
             s=smtplib.SMTP_SSL("smtp.gmail.com",465)
             s.login('shubhuu5171@gmail.com',"gzstnwbzcfevtjea")
             send_to=e5.get()
-            msgg=f"The OPT for Student registeration is {OTP1} \n\nThanks for choosing us."
+            msgg=f"The OTP for User registeration is {OTP1} \n\nThanks for choosing us."
             s.sendmail('shubhuu5171@gmail.com',send_to,msgg)
 
             root1=Tk()
@@ -599,17 +615,17 @@ def login_window():
 
     #Creating Lable of Email
     lr1=Label(rootk,text="Enter Email ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
-    lr1.place(anchor=CENTER,x=105,y=100)
+    lr1.place(anchor=CENTER,x=85,y=100)
     #Creating Textbox of Email
     er1=Entry(rootk,width=26,font="calibri")
-    er1.place(anchor=CENTER,x=305,y=100)
+    er1.place(anchor=CENTER,x=328,y=100)
 
     #Creating Password Label
     lr2=Label(rootk,text="Enter Password ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
     lr2.place(anchor=CENTER,x=105,y=140)
     #Creating Password textbox
-    er2=Entry(rootk,width=23,show="*",font="calbri")
-    er2.place(anchor=CENTER,x=305,y=140)
+    er2=Entry(rootk,width=24,show="*",font="calbri")
+    er2.place(anchor=CENTER,x=328,y=140)
 
     login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",font="arial 12 bold",height=20,width=50,relief=GROOVE)
     login_button.pack(anchor=CENTER)
@@ -651,7 +667,95 @@ def main_window():
                 msg.showinfo("Login Successful", "Welcome, Manager!")
                 manager_login_win.destroy()  # Close the manager login window after successful login
                 # You can add more functionality here after successful login
-                register_window()
+
+                def fetch_emails():
+                    # Connect to your SQLite database
+                    conn = sqlite3.connect(DATABASE_FILE)
+                    cursor = conn.cursor()
+
+                    # Fetch emails from the "notification" table
+                    cursor.execute(f"SELECT email FROM {TABLE_NAME}")
+                    emails = cursor.fetchall()
+
+                    # Close the connection
+                    conn.close()
+
+                    # Extract emails from the result
+                    emails_list = ["Select User"]  # Adding "Select User" as the default option
+                    emails_list.extend([email[0] for email in emails])
+
+                    return emails_list
+
+
+                def send_notification():
+                    selected_email_value = selected_email.get()
+                    notification_subject = "Manger Notification"  # Get the subject from the entry field
+                    notification_message = notification_text.get("1.0", "end-1c")  # Get the text from the text box
+
+                    # SMTP Configuration
+                    smtp_server = "smtp.gmail.com"
+                    smtp_port = 587  # TLS Port
+                    smtp_username = "shubhuu5171@gmail.com"  # Update with your email
+                    smtp_password = "gzstnwbzcfevtjea"  # Update with your password
+
+                    # Create SMTP connection
+                    with smtplib.SMTP(smtp_server, smtp_port) as server:
+                        server.starttls()
+                        server.login(smtp_username, smtp_password)
+
+                        # Construct and send the email
+                        email_message = f"Subject: {notification_subject}\n\n"
+                        email_message += f"Dear Employee,\n\n{notification_message}\n\nBest Regards,\nShubham Navale\n(CEO)"
+                        server.sendmail(smtp_username, selected_email_value, email_message)
+
+
+                # def send_notification():
+                #     selected_email_value = selected_email.get()
+                #     notification_message = notification_text.get("1.0", "end-1c")  # Get the text from the text box
+
+                #     s=smtplib.SMTP_SSL("smtp.gmail.com",465)
+                #     s.login('shubhuu5171@gmail.com',"gzstnwbzcfevtjea")
+                #     msgg=f"There is a notification from Shubham Navale (Manager):\n{notification_message}"
+                #     s.sendmail('shubhuu5171@gmail.com',selected_email_value,msgg)
+
+                win1 = Tk()
+                win1.title("Notifier")
+                win1.config(bg="MediumPurple1")
+
+                screen_width = win1.winfo_screenwidth()
+                screen_height = win1.winfo_screenheight()
+                x_dim = (screen_width - 500) // 2
+                y_dim = (screen_height - 350) // 2
+
+                win1.geometry(f"500x350+{x_dim}+{y_dim}")
+                win1.minsize(500, 350)
+                win1.maxsize(500, 350)
+
+                # Label for the Title
+                l1 = Label(win1, text=" Notifier ", font=("Times", 30, "bold"), bg="MediumPurple1", fg="white", relief="ridge")
+                l1.pack(pady=20)
+
+                # Dropdown list for emails
+                emails = fetch_emails()
+                selected_email = StringVar(win1)
+                selected_email.set(emails[0])  # Set default value
+                email_dropdown = OptionMenu(win1, selected_email, *emails)
+                email_dropdown.pack(pady=10)
+
+                # Text box for notification message
+                notification_text = Text(win1, height=6, width=40)
+                notification_text.pack(pady=10)
+
+                # Send Notification Button
+                b2 = Button(win1, text="Send Notification", relief="groove", font=("arial", 10, "bold"), bg="Salmon", width=30, command=send_notification)
+                b2.pack(pady=10)
+
+                # Blank Label
+                lblank1 = Label(win1, bg="MediumPurple1")
+                lblank1.pack()
+
+                win1.mainloop()
+
             else:
                 msg.showerror("Login Failed", "Invalid username or password")
 
