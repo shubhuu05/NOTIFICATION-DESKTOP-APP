@@ -142,12 +142,12 @@ def app_window():
         cur_db = connection.cursor()
 
         # Fetch all rows from the USER_email table
-        cur_db.execute(f"SELECT * FROM {USER_email.split("@")[0]}")
-        rows = cur_db.fetchall()
+        cur_db.execute(f"SELECT id FROM {USER_email.split("@")[0]}")
+        rows = cur_db.fetchone()
 
                 
         # Delete the current row
-        cur_db.execute(f"DELETE FROM {USER_email.split("@")[0]} WHERE rowid=?", (rows[0]))  # Assuming the rowid is used
+        cur_db.execute(f"DELETE FROM {USER_email.split("@")[0]} WHERE id=?", (rows))  # Assuming the rowid is used
         connection.commit()  # Commit the deletion for each row
 
         # Update the history table after each deletion
@@ -204,12 +204,62 @@ def app_window():
 
     # Load and display the image
     img = Image.open("notify-label.png")
-    tkimage = ImageTk.PhotoImage(img)
+    width, height = 650, 60
+    resized_image = img.resize((width, height))
+    tkimage = ImageTk.PhotoImage(resized_image)
     img_label = Label(t, image=tkimage)
-    img_label.grid(row=0, column=0, columnspan=3, padx=20, pady=20)
+    img_label.grid(row=0, column=0, columnspan=3, pady=20)
     custom_sound_path = StringVar(value="")
     custom_duration = IntVar(value=10)
+    
+    # Load and display the image
+    original_image = Image.open("notification.png")
 
+    width, height = 30, 30
+    resized_image = original_image.resize((width, height))
+
+    tkimage1 = ImageTk.PhotoImage(resized_image)
+
+    # Notification button function
+    def show_notification():
+        # Create a Toplevel window
+        notification_window = Toplevel(t)
+        notification_window.title("Notification")
+
+        # Set the size of the Toplevel window
+        notification_window.geometry("410x180")  # Adjust the width and height as needed
+
+        # Connect to the database and fetch notification message
+        connection = sqlite3.connect(DATABASE_FILE)
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT notifi FROM {TABLE_NAME} WHERE email=?", (USER_email,))
+        notification_msg = cursor.fetchone()[0]
+        connection.close()
+
+        # Display the notification message in a Text widget
+        notification_text = Text(notification_window, wrap="word", width=50, height=10,font="cambria 12")  # Adjust width and height as needed
+        notification_text.insert("1.0", notification_msg)
+        notification_text.pack()
+
+    # Create the image button
+    image_button = Button(t, image=tkimage1,relief="flat",command=show_notification)
+    image_button.place(x=568,y=95)
+    # Image button Label
+    notifi_label = Label(t,text="",font="arial 10 bold",fg="Black")
+    notifi_label.place(x=530,y=130)
+    
+    
+    connection=sqlite3.connect(DATABASE_FILE)
+    cur_db=connection.cursor()
+    print(TABLE_NAME,USER_email)
+    cur_db.execute(f"select notifi from {TABLE_NAME} where email=\"{USER_email}\"")
+    notifi=cur_db.fetchone()
+    print(notifi, type(notifi))
+    if notifi[0]=='NA':
+        notifi_label.config(text="No New Notifications")
+    else:
+        notifi_label.config(text="1 New Notification")
+    
     # Controls
     labels_font = ("Arial", 10)
     entry_font = ("Arial", 13)
@@ -258,9 +308,9 @@ def app_window():
     custom_duration_entry.grid(row=6, column=1, padx=20, sticky="w")
 
     refresh_button=Button(t,text="Refresh",command=update_history_table)
-    refresh_button.grid(row=6,column=2,sticky="w")
+    refresh_button.place(x=538,y=300)
     refresh_button=Button(t,text="Clear",command=delete_hist_for_sure)
-    refresh_button.grid(row=6,column=3,sticky="w")
+    refresh_button.place(x=598,y=300)
 
     # History Table
     style = ttk.Style()
@@ -354,9 +404,19 @@ def register_window():
                         rootk.minsize(500,220)
                         rootk.maxsize(500,220)
 
+                        # Back Arrow
+                        back_arrow_image = PhotoImage(file="BackArrow.png")
+                        back_arrow_image=back_arrow_image.subsample(18,18)
+                        # Keep a reference of the photo image
+                        rootk.back_arrow_image = back_arrow_image
+
+                        # Create an image button with the correct reference
+                        button = Button(rootk, image=rootk.back_arrow_image, bg="MediumPurple1", borderwidth=0, relief='flat', activebackground="MediumPurple1", command=lambda: [rootk.destroy(), main_window()])
+                        button.place(x=10, y=2)
+
                         #Creating a blank textbox
                         blabel1=Label(rootk,bg="MediumPurple1")
-                        blabel1.pack()
+                        blabel1.pack(pady=10)    
                         blank_label=Label(rootk,text="Please enter your Login Credentials",bg="MediumPurple1",fg="white",font="arial 20 bold",width=28,relief=RIDGE)
                         blank_label.pack()
                         blabel2=Label(rootk,bg="MediumPurple1")
@@ -369,24 +429,22 @@ def register_window():
                         blabel3.pack()
                         blabel3=Label(rootk,bg="MediumPurple1")
                         blabel3.pack()
-                        blabel3=Label(rootk,bg="MediumPurple1")
-                        blabel3.pack()
 
                         #Creating Lable of Email
-                        lr1=Label(rootk,text="Email ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
-                        lr1.place(anchor=CENTER,x=57,y=100)
+                        lr1=Label(rootk,text="Enter Email ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
+                        lr1.place(anchor=CENTER,x=85,y=115)
                         #Creating Textbox of Email
                         er1=Label(rootk,width=25,text=email,font="calibri",fg="white",bg="MediumPurple1",justify=LEFT,anchor=W,relief="groove")
-                        er1.place(anchor=CENTER,x=325,y=100)
+                        er1.place(anchor=CENTER,x=328,y=115)
 
                         #Creating Password Label
                         lr2=Label(rootk,text="Enter Password ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
-                        lr2.place(anchor=CENTER,x=105,y=140)
+                        lr2.place(anchor=CENTER,x=105,y=155)
                         #Creating Password textbox
-                        er2=Entry(rootk,width=23,show="*",font="calbri")
-                        er2.place(anchor=CENTER,x=325,y=140)
+                        er2=Entry(rootk,width=24,show="*",font="calbri")
+                        er2.place(anchor=CENTER,x=328,y=155)
 
-                        login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",font="arial 12 bold",height=20,width=50,relief=GROOVE)
+                        login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",height=10,font="arial 12 bold",width=50,relief=GROOVE)
                         login_button.pack(anchor=CENTER)
                         login_button.config(command=chck_cred)
                         
@@ -594,10 +652,21 @@ def login_window():
     rootk.geometry("500x220")
     rootk.minsize(500,220)
     rootk.maxsize(500,220)
+    
+
+    # Back Arrow
+    back_arrow_image = PhotoImage(file="BackArrow.png")
+    back_arrow_image=back_arrow_image.subsample(18,18)
+    # Keep a reference of the photo image
+    rootk.back_arrow_image = back_arrow_image
+
+    # Create an image button with the correct reference
+    button = Button(rootk, image=rootk.back_arrow_image, bg="MediumPurple1", borderwidth=0, relief='flat', activebackground="MediumPurple1", command=lambda: [rootk.destroy(), main_window()])
+    button.place(x=10, y=2)
 
     #Creating a blank textbox
     blabel1=Label(rootk,bg="MediumPurple1")
-    blabel1.pack()
+    blabel1.pack(pady=10)    
     blank_label=Label(rootk,text="Please enter your Login Credentials",bg="MediumPurple1",fg="white",font="arial 20 bold",width=28,relief=RIDGE)
     blank_label.pack()
     blabel2=Label(rootk,bg="MediumPurple1")
@@ -610,24 +679,22 @@ def login_window():
     blabel3.pack()
     blabel3=Label(rootk,bg="MediumPurple1")
     blabel3.pack()
-    blabel3=Label(rootk,bg="MediumPurple1")
-    blabel3.pack()
 
     #Creating Lable of Email
     lr1=Label(rootk,text="Enter Email ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
-    lr1.place(anchor=CENTER,x=85,y=100)
+    lr1.place(anchor=CENTER,x=85,y=115)
     #Creating Textbox of Email
     er1=Entry(rootk,width=26,font="calibri")
-    er1.place(anchor=CENTER,x=328,y=100)
+    er1.place(anchor=CENTER,x=328,y=115)
 
     #Creating Password Label
     lr2=Label(rootk,text="Enter Password ",relief=GROOVE,font=("arial",14,"bold"),bg="MediumPurple1")
-    lr2.place(anchor=CENTER,x=105,y=140)
+    lr2.place(anchor=CENTER,x=105,y=155)
     #Creating Password textbox
     er2=Entry(rootk,width=24,show="*",font="calbri")
-    er2.place(anchor=CENTER,x=328,y=140)
+    er2.place(anchor=CENTER,x=328,y=155)
 
-    login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",font="arial 12 bold",height=20,width=50,relief=GROOVE)
+    login_button=Button(rootk,text="Login",bg="white",fg="MediumPurple1",height=10,font="arial 12 bold",width=50,relief=GROOVE)
     login_button.pack(anchor=CENTER)
     login_button.config(command=chck_cred)
     
@@ -688,36 +755,52 @@ def main_window():
 
 
                 def send_notification():
-                    selected_email_value = selected_email.get()
-                    notification_subject = "Manger Notification"  # Get the subject from the entry field
-                    notification_message = notification_text.get("1.0", "end-1c")  # Get the text from the text box
+                    
+                    try:
+                        selected_email_value = selected_email.get()
+                        if selected_email_value=="Select User":
+                            raise ValueError("Please select the email")
+                        notification_subject = "Manger Notification"  # Get the subject from the entry field
+                        notification_message = notification_text.get("1.0", "end-1c")  # Get the text from the text box
+                        # SMTP Configuration
+                        smtp_server = "smtp.gmail.com"
+                        smtp_port = 587  # TLS Port
+                        smtp_username = "shubhuu5171@gmail.com"  # Update with your email
+                        smtp_password = "gzstnwbzcfevtjea"  # Update with your password
 
-                    # SMTP Configuration
-                    smtp_server = "smtp.gmail.com"
-                    smtp_port = 587  # TLS Port
-                    smtp_username = "shubhuu5171@gmail.com"  # Update with your email
-                    smtp_password = "gzstnwbzcfevtjea"  # Update with your password
+                        # Create SMTP connection
+                        with smtplib.SMTP(smtp_server, smtp_port) as server:
+                            server.starttls()
+                            server.login(smtp_username, smtp_password)
 
-                    # Create SMTP connection
-                    with smtplib.SMTP(smtp_server, smtp_port) as server:
-                        server.starttls()
-                        server.login(smtp_username, smtp_password)
+                            # Construct and send the email
+                            email_message = f"Subject: {notification_subject}\n\n"
+                            email_message += f"Dear Employee,\n\n{notification_message}\n\nBest Regards,\nShubham Navale\n(CEO)"
+                            server.sendmail(smtp_username, selected_email_value, email_message)
 
-                        # Construct and send the email
-                        email_message = f"Subject: {notification_subject}\n\n"
-                        email_message += f"Dear Employee,\n\n{notification_message}\n\nBest Regards,\nShubham Navale\n(CEO)"
-                        server.sendmail(smtp_username, selected_email_value, email_message)
+                        
+                                           
+                        
+                        connection = sqlite3.connect(DATABASE_FILE)
+                        cur_db = connection.cursor()
+                        
+                        notification_msg = f"{notification_message} - Shubham Navale (CEO)"  # Appending additional information
+                        
+                        # Using parameterized queries to prevent SQL injection attacks
+                        cur_db.execute(f"UPDATE {TABLE_NAME} SET notifi=? WHERE email=?", (notification_msg, selected_email_value))
+                        
+                        
+                        connection.commit()
+                        msg.showinfo("Email sent successfully",f"The email has sent to {selected_email_value} successfully.")
 
+                    except Exception as e:
+                        msg.showerror("Error has occured !",e)
+                        print(e)
 
-                # def send_notification():
-                #     selected_email_value = selected_email.get()
-                #     notification_message = notification_text.get("1.0", "end-1c")  # Get the text from the text box
+                    finally:
+                        connection.close()
 
-                #     s=smtplib.SMTP_SSL("smtp.gmail.com",465)
-                #     s.login('shubhuu5171@gmail.com',"gzstnwbzcfevtjea")
-                #     msgg=f"There is a notification from Shubham Navale (Manager):\n{notification_message}"
-                #     s.sendmail('shubhuu5171@gmail.com',selected_email_value,msgg)
-
+                        
                 win1 = Tk()
                 win1.title("Notifier")
                 win1.config(bg="MediumPurple1")
@@ -725,11 +808,11 @@ def main_window():
                 screen_width = win1.winfo_screenwidth()
                 screen_height = win1.winfo_screenheight()
                 x_dim = (screen_width - 500) // 2
-                y_dim = (screen_height - 350) // 2
+                y_dim = (screen_height - 400) // 2
 
-                win1.geometry(f"500x350+{x_dim}+{y_dim}")
-                win1.minsize(500, 350)
-                win1.maxsize(500, 350)
+                win1.geometry(f"500x400+{x_dim}+{y_dim}")
+                win1.minsize(500, 400)
+                win1.maxsize(500, 400)
 
                 # Label for the Title
                 l1 = Label(win1, text=" Notifier ", font=("Times", 30, "bold"), bg="MediumPurple1", fg="white", relief="ridge")
@@ -742,8 +825,17 @@ def main_window():
                 email_dropdown = OptionMenu(win1, selected_email, *emails)
                 email_dropdown.pack(pady=10)
 
+                info_label=Label(win1,text="Type the message you want to send",font="arial 10 bold",fg="Black",bg="MediumPurple1")
+                info_label.pack(pady=10)
+
+                def on_click(event):
+                    notification_text.delete("1.0", "end-1c")
+                    notification_text.config(fg="Black")         
+
                 # Text box for notification message
-                notification_text = Text(win1, height=6, width=40)
+                notification_text = Text(win1, height=8, width=60, fg="Grey",wrap="word")
+                notification_text.insert("1.0", "Type Here...")
+                notification_text.bind("<FocusIn>", on_click)
                 notification_text.pack(pady=10)
 
                 # Send Notification Button
